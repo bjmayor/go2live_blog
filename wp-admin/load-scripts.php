@@ -3,7 +3,7 @@
 /**
  * Disable error reporting
  *
- * Set this to error_reporting( -1 ) for debugging.
+ * Set this to error_reporting( E_ALL ) or error_reporting( E_ALL | E_STRICT ) for debugging
  */
 error_reporting(0);
 
@@ -20,6 +20,7 @@ function __() {}
  * @ignore
  */
 function _x() {}
+
 
 /**
  * @ignore
@@ -50,11 +51,6 @@ function is_lighttpd_before_150() {}
  * @ignore
  */
 function add_action() {}
-
-/**
- * @ignore
- */
-function did_action() {}
 
 /**
  * @ignore
@@ -96,13 +92,6 @@ function includes_url() {}
  */
 function wp_guess_url() {}
 
-if ( ! function_exists( 'json_encode' ) ) :
-/**
- * @ignore
- */
-function json_encode() {}
-endif;
-
 function get_file($path) {
 
 	if ( function_exists('realpath') )
@@ -114,12 +103,8 @@ function get_file($path) {
 	return @file_get_contents($path);
 }
 
-$load = $_GET['load'];
-if ( is_array( $load ) )
-	$load = implode( '', $load );
-
-$load = preg_replace( '/[^a-z0-9,_-]+/i', '', $load );
-$load = array_unique( explode( ',', $load ) );
+$load = preg_replace( '/[^a-z0-9,_-]+/i', '', $_GET['load'] );
+$load = explode(',', $load);
 
 if ( empty($load) )
 	exit;
@@ -129,7 +114,7 @@ require(ABSPATH . WPINC . '/version.php');
 
 $compress = ( isset($_GET['c']) && $_GET['c'] );
 $force_gzip = ( $compress && 'gzip' == $_GET['c'] );
-$expires_offset = 31536000; // 1 year
+$expires_offset = 31536000;
 $out = '';
 
 $wp_scripts = new WP_Scripts();
@@ -143,7 +128,7 @@ foreach( $load as $handle ) {
 	$out .= get_file($path) . "\n";
 }
 
-header('Content-Type: application/javascript; charset=UTF-8');
+header('Content-Type: application/x-javascript; charset=UTF-8');
 header('Expires: ' . gmdate( "D, d M Y H:i:s", time() + $expires_offset ) . ' GMT');
 header("Cache-Control: public, max-age=$expires_offset");
 

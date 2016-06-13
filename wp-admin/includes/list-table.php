@@ -13,13 +13,10 @@
  * @access private
  * @since 3.1.0
  *
- * @global string $hook_suffix
- *
  * @param string $class The type of the list table, which is the class name.
- * @param array $args Optional. Arguments to pass to the class. Accepts 'screen'.
  * @return object|bool Object on success, false if the class does not exist.
  */
-function _get_list_table( $class, $args = array() ) {
+function _get_list_table( $class ) {
 	$core_classes = array(
 		//Site Admin
 		'WP_Posts_List_Table' => 'posts',
@@ -31,7 +28,7 @@ function _get_list_table( $class, $args = array() ) {
 		'WP_Links_List_Table' => 'links',
 		'WP_Plugin_Install_List_Table' => 'plugin-install',
 		'WP_Themes_List_Table' => 'themes',
-		'WP_Theme_Install_List_Table' => array( 'themes', 'theme-install' ),
+		'WP_Theme_Install_List_Table' => 'theme-install',
 		'WP_Plugins_List_Table' => 'plugins',
 		// Network Admin
 		'WP_MS_Sites_List_Table' => 'ms-sites',
@@ -40,17 +37,8 @@ function _get_list_table( $class, $args = array() ) {
 	);
 
 	if ( isset( $core_classes[ $class ] ) ) {
-		foreach ( (array) $core_classes[ $class ] as $required )
-			require_once( ABSPATH . 'wp-admin/includes/class-wp-' . $required . '-list-table.php' );
-
-		if ( isset( $args['screen'] ) )
-			$args['screen'] = convert_to_screen( $args['screen'] );
-		elseif ( isset( $GLOBALS['hook_suffix'] ) )
-			$args['screen'] = get_current_screen();
-		else
-			$args['screen'] = null;
-
-		return new $class( $args );
+		require_once( ABSPATH . 'wp-admin/includes/class-wp-' . $core_classes[ $class ] . '-list-table.php' );
+		return new $class;
 	}
 
 	return false;
@@ -86,10 +74,10 @@ function print_column_headers($screen, $id = true) {
  * @since 3.1.0
  */
 class _WP_List_Table_Compat extends WP_List_Table {
-	public $_screen;
-	public $_columns;
+	var $_screen;
+	var $_columns;
 
-	public function __construct( $screen, $columns = array() ) {
+	function _WP_List_Table_Compat( $screen, $columns = array() ) {
 		if ( is_string( $screen ) )
 			$screen = convert_to_screen( $screen );
 
@@ -97,16 +85,11 @@ class _WP_List_Table_Compat extends WP_List_Table {
 
 		if ( !empty( $columns ) ) {
 			$this->_columns = $columns;
-			add_filter( 'manage_' . $screen->id . '_columns', array( $this, 'get_columns' ), 0 );
+			add_filter( 'manage_' . $screen->id . '_columns', array( &$this, 'get_columns' ), 0 );
 		}
 	}
 
-	/**
-	 * @access protected
-	 *
-	 * @return array
-	 */
-	protected function get_column_info() {
+	function get_column_info() {
 		$columns = get_column_headers( $this->_screen );
 		$hidden = get_hidden_columns( $this->_screen );
 		$sortable = array();
@@ -114,12 +97,8 @@ class _WP_List_Table_Compat extends WP_List_Table {
 		return array( $columns, $hidden, $sortable );
 	}
 
-	/**
-	 * @access public
-	 *
-	 * @return array
-	 */
-	public function get_columns() {
+	function get_columns() {
 		return $this->_columns;
 	}
 }
+?>

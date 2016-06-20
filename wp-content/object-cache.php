@@ -351,7 +351,7 @@ class WP_Object_Cache {
 			$buckets = array('default' => $buckets);
 
 		foreach ( $buckets as $bucket => $servers) {
-			$this->mc[$bucket] = memcache_init();
+			$this->mc[$bucket] = $this->memcache_init();
 		}
 
 		global $blog_id, $table_prefix;
@@ -360,6 +360,13 @@ class WP_Object_Cache {
 
 		$this->cache_hits =& $this->stats['get'];
 		$this->cache_misses =& $this->stats['add'];
+	}
+
+	function memcache_init()
+	{
+		$memcache = new Memcache;
+		$memcache->connect("127.0.0.1", 11211);
+		return $memcache;
 	}
 }
 ?>

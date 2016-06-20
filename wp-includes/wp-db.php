@@ -536,6 +536,7 @@ class wpdb {
 		}
 
 		$this->ready = true;
+		$this->select($dbname);
 
 	}
 

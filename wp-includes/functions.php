@@ -2257,7 +2257,7 @@ function wp_upload_dir( $time = null ) {
 
 	// for SAE
 	$dir = 'saestor://wordpress/uploads';
-	$url = 'http://' . $_SERVER['HTTP_APPNAME'] . '-wordpress.stor.sinaapp.com/uploads';
+	$url = 'http://go2live.cn/uploads';
 
 	$bdir = $dir;
 	$burl = $url;
